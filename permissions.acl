@@ -1,0 +1,97 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Sample access control list.
+ */
+
+ rule Onlyvendorscanchangeshipmentstatusforshipmentoretailer{
+  description:"Only the vendor can change the shipment status of a shipment to the retailer"
+  participant(p):"test.Vendor"
+  operation:UPDATE
+  resource(r):"test.shipment_to_retailer"
+  transaction(tx):"test.shipmentRecieved_by_retailer"
+  condition:(p.getIdentifier()==r.fooditem.vendor.getIdentifier())
+  action:ALLOW
+ }
+
+ rule Onlyretailerscanchangeshipmentstatusforshipmentoconsumer{
+   description:"Only the retailer can change the shipment status of a shipment to the consumer"
+   participant(p):"test.Retailer"
+   operation:UPDATE
+   resource(r):"test.shipment_to_consumer"
+   transaction(tx):"test.shipmentRecieved_by_consumer"
+   condition:(p.getIdentifier()==r.fooditem.retailer.getIdentifier())
+   action:ALLOW
+ }
+
+
+ rule Onlyconsumercanmakeshipmenttoconsumertrans{
+   description:"Only the consumer can add shipments to the consumer"
+   participant(p):"test.Consumer"
+   operation:CREATE
+   resource(v):"test.shipment_to_consumer"
+   condition:(p.getIdentifier()==v.consumer.getIdentifier())
+   action:ALLOW
+ }
+
+rule Onlyretailercanmakeshipmenttoretailertrans{
+  description:"Only the retailer can add shipments to the retailer"
+  participant(p):"test.Retailer"
+  operation:CREATE
+  resource(v):"test.shipment_to_retailer"
+  condition:(p.getIdentifier()==v.retailer.getIdentifier())
+  action:ALLOW
+}
+
+rule Onlyvendorscancreatefooditems{
+  description:"Allow only vendors to make food items"
+  participant(m):"test.Vendor"
+  operation:ALL
+  resource(v):"test.food_item_owned_by_vendor"
+  condition:(v.vendor.getIdentifier()==m.getIdentifier())
+  action:ALLOW
+}
+
+rule EverybodyCanReadEverything{
+  description:"Allow everyone to read everything in the network"
+  participant:"org.hyperledger.composer.system.Participant"
+  operation:READ
+  resource:"test.*"
+  action:ALLOW
+}
+
+rule SystemACL{
+  description:"Allow eveyone to access all system resources"
+  participant:"org.hyperledger.composer.system.Participant"
+  operation:ALL
+  resource:"org.hyperledger.composer.system.**"
+  action:ALLOW
+}
+
+rule Adminrule{
+  description:"Allow the network admin to do everything"
+  participant:"org.hyperledger.composer.system.NetworkAdmin"
+  operation:ALL
+  resource:"**"
+  action:ALLOW
+}
+
+rule AdminruleSystem{
+  description:"Allow the network admin to do everything"
+  participant:"org.hyperledger.composer.system.NetworkAdmin"
+  operation:ALL
+  resource:"org.hyperledger.composer.system.**"
+  action:ALLOW
+}

@@ -1,0 +1,96 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Write your model definitions here
+ */
+
+namespace test
+
+enum Availibility{
+ o Available
+ o Not_Available
+}
+
+asset food_item_owned_by_vendor identified by batch_num{
+ o String batch_num
+ o String name
+ --> Vendor vendor
+ o Double price
+ o DateTime mkgdate
+ o Availibility availstatus
+ }
+
+ asset food_item_owned_by_retailer identified by batch_num{
+  o String batch_num
+  o String name
+  --> Retailer retailer
+  o Double price
+  o DateTime mkgdate
+  o Availibility availstatus
+ }
+
+ asset food_item_owned_by_consumer identified by batch_num{
+  o String batch_num
+  o String name
+  --> Consumer consumer
+  o Double price
+  o DateTime mkgdate
+ }
+
+
+enum ShipmentStatus{
+  o ORDERED
+  o DELIVERED
+ }
+
+asset shipment_to_retailer identified by shipmentid{
+ o String shipmentid
+ o ShipmentStatus status
+ o Integer number
+ --> food_item_owned_by_vendor fooditem
+ --> Retailer retailer
+}
+
+asset shipment_to_consumer identified by shipmentid{
+ o String shipmentid
+ o ShipmentStatus status
+ o Integer number
+ --> food_item_owned_by_retailer fooditem
+ --> Consumer consumer
+}
+
+abstract participant Business identified by aadhar_num{
+ o String aadhar_num
+ o String name
+ o String email
+ o Double accountbalance
+}
+
+participant Vendor extends Business{
+}
+
+participant Retailer extends Business{
+}
+
+participant Consumer extends Business{
+}
+
+transaction shipmentRecieved_by_retailer {
+ --> shipment_to_retailer shipment
+}
+
+transaction shipmentRecieved_by_consumer {
+ --> shipment_to_consumer shipment
+}
